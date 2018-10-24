@@ -30,35 +30,56 @@ describe("Connect to remote server", function() {
     assert(wsConstructor.calledOnce);
     assert(wsConstructor.calledWithNew());
     assert(wsConstructor.call);
-    assert.deepEqual(wsConstructor.args, [['ws://localhost:3000/websocket', null, {}]]);
+    assert.deepEqual(wsConstructor.args, [['ws://localhost:3000/websocket', null, { tls: {} }]]);
   });
 
   it('should connect to the provided host', function() {
     new DDPClient({'host': 'myserver.com'}).connect();
-    assert.deepEqual(wsConstructor.args, [['ws://myserver.com:3000/websocket', null, {}]]);
+    assert.deepEqual(wsConstructor.args, [['ws://myserver.com:3000/websocket', null, { tls: {} }]]);
   });
 
   it('should connect to the provided host and port', function() {
     new DDPClient({'host': 'myserver.com', 'port': 42}).connect();
-    assert.deepEqual(wsConstructor.args, [['ws://myserver.com:42/websocket', null, {}]]);
+    assert.deepEqual(wsConstructor.args, [['ws://myserver.com:42/websocket', null, { tls: {} }]]);
   });
 
   it('should use ssl if the port is 443', function() {
     new DDPClient({'host': 'myserver.com', 'port': 443}).connect();
-    assert.deepEqual(wsConstructor.args, [['wss://myserver.com:443/websocket', null, {}]]);
+    assert.deepEqual(wsConstructor.args, [['wss://myserver.com:443/websocket', null, { tls: {} }]]);
   });
 
   it('should propagate tls options if specified', function() {
     var tlsOpts = {
       'ca': ['fake_pem_content']
-    }
+    };
     new DDPClient({'host': 'myserver.com', 'port': 443, 'tlsOpts': tlsOpts}).connect();
-    assert.deepEqual(wsConstructor.args, [['wss://myserver.com:443/websocket', null, tlsOpts]]);
+    assert.deepEqual(wsConstructor.args, [['wss://myserver.com:443/websocket', null, { tls: tlsOpts }]]);
+  });
+
+  it('should propagate proxy options if specified', function() {
+    var proxyOpts = {
+      origin: 'http://username:password@proxy.example.com',
+      headers: {'User-Agent': 'node'}
+    };
+    new DDPClient({'host': 'myserver.com', 'port': 443, 'proxyOpts': proxyOpts}).connect();
+    assert.deepEqual(wsConstructor.args, [['wss://myserver.com:443/websocket', null, { proxy: proxyOpts, tls: {} }]]);
+  });
+
+  it('should propagate both tls and proxy options if specified', function() {
+    var tlsOpts = {
+      'ca': ['fake_pem_content']
+    };
+    var proxyOpts = {
+      origin: 'http://username:password@proxy.example.com',
+      headers: {'User-Agent': 'node'}
+    };
+    new DDPClient({'host': 'myserver.com', 'port': 443, 'tlsOpts': tlsOpts, 'proxyOpts': proxyOpts}).connect();
+    assert.deepEqual(wsConstructor.args, [['wss://myserver.com:443/websocket', null, { tls: tlsOpts, proxy: proxyOpts }]]);
   });
 
   it('should connect to the provided url', function() {
     new DDPClient({'url': 'wss://myserver.com/websocket'}).connect();
-    assert.deepEqual(wsConstructor.args, [['wss://myserver.com/websocket', null, {} ]]);
+    assert.deepEqual(wsConstructor.args, [['wss://myserver.com/websocket', null, { tls: {} } ]]);
   });
 
   it('should fallback to sockjs if url and useSockJs:true are provided', function() {
