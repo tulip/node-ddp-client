@@ -26,7 +26,7 @@
   "dependencies": {
     "ddp-ejson": "0.8.1-3",
     "ddp-underscore-patched": "0.8.1-2",
-    "faye-websocket": "^0.11.0",
+    "faye-websocket": "tulip/faye-websocket-node#437a4004cbc2fa707650720185322677d12ec629",
     "request": "2.87.0"
   },
   "devDependencies": {
